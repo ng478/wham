@@ -7,7 +7,7 @@ class window:
     def __init__(self,f):
        # K=[30,50,105,131,155,171,201,221,240,258,280,309,340,365,423]
         self.center_pos = 0
-        self.sc=f.split('_')[1].split('-')[0]
+        self.sc=float(f.split('_')[1].split('-')[0])
         self.framenum=f.split('_')[0].split('m')[1]
         #frm30_10-run.colvars.traj
         #frm30_10.cv
@@ -99,7 +99,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
             this_denom = 0
             #coord = W[0].bin_edge[j]-W[0].bin_edge[j-1]
             for i,w in enumerate(windows):
-                v=0.5*10*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2 #bias potential, (first '10' is the spring constant, the code did not like w.sc because it is a sequence)
+                v=0.5*w.sc*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2
                 #add something to catch extreme values of v to prevent floating pt error
                 exp1 = math.exp(-beta*(v-F[i]))
                 this_denom += w.n*exp1
