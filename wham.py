@@ -138,10 +138,14 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
             new_F[i] = F_i
         #do a sum of sq differences element by element
         ssqd = np.sum((F-new_F)**2)
-        print(ssqd, "ssqd")
+        #print(ssqd, "ssqd")
+        #print(F, "F_before")
+        
         if ssqd>tol:
-            is_converged = False
             F = new_F
+            #print(F, "F_after")
+            is_converged = False
+            
     return Total_P
 
 if __name__ == '__main__':
