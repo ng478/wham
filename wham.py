@@ -142,7 +142,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         #print(F, "F_before")
         
         if ssqd>tol:
-            F = new_F
+            F = np.copy(new_F)  # overwrite old F with new_F
             #print(F, "F_after")
             is_converged = False
             
