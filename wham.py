@@ -103,8 +103,8 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 v=0.5*w.sc*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2
                 #add something to catch extreme values of v to prevent floating pt error
                 exp1 = math.exp(-beta*(v-F[i]))
-                print(v,"v")
-                print(F[i],"F[i]")
+                #print(v,"v")
+                #print(F[i],"F[i]")
                 if exp1 == 0: #bc initial array sets this to 0 and then gives us an error for summand (dividing by 0)
                     exp1 = 1
                 #print(beta,"beta")
@@ -138,6 +138,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
             new_F[i] = F_i
         #do a sum of sq differences element by element
         ssqd = np.sum((F-new_F)**2)
+        print(ssqd, "ssqd")
         if ssqd>tol:
             is_converged = False
             F = new_F
