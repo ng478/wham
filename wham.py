@@ -11,7 +11,7 @@ class window:
         self.framenum=f.split('_')[0].split('m')[1]
         #frm30_10-run.colvars.traj
         #frm30_10.cv
-        cv_filename = 'frm{}_{}.cv'.format(self.framenum,self.sc)
+        cv_filename = 'frm{}_{}.cv'.format(self.framenum,int(self.sc))
         self.steps,self.dist=np.loadtxt(f,unpack=True)
         with open (cv_filename) as cvf:
             data = cvf.read().split('\n') #cv file split by newline
@@ -91,6 +91,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         numer = 0
         n = 0
         N = 0
+        sum1 = 0
         tol = 0.000001
         for i,w in enumerate(windows):
             w.n = sum([w.occur[i] for i in range(len(w.occur))])
@@ -102,6 +103,12 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 v=0.5*w.sc*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2
                 #add something to catch extreme values of v to prevent floating pt error
                 exp1 = math.exp(-beta*(v-F[i]))
+                print(v,"v")
+                print(F[i],"F[i]")
+                if exp1 == 0: #bc initial array sets this to 0 and then gives us an error for summand (dividing by 0)
+                    exp1 = 1
+                #print(beta,"beta")
+                #print(exp1,"exp1")
                 this_denom += w.n*exp1
                 #print(this_denom,"this_denom")
             denom.append(this_denom)
@@ -112,13 +119,14 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 n = sum([w.occur[i] for i in range(len(w.occur))]) #make attribute earlier in hist
                 #print(w.density[j], "w.density[j]")
                 #print(type(w.density[0]), "type(w.density[j])")
-                print("range",range(nbins))
+                #print("range",range(nbins))
                 d = w.density[j]
 
                 summand = n*d/denom[j]
+                #print(denom[j], "denom[j]")
                 #print(summand, "summand")
                 P_i += summand
-                print(P_i, "P_i")
+                #print(P_i, "P_i")
             Total_P[j] = P_i #eqn 4
    #eqn 5 below 
            
@@ -127,12 +135,12 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 v=0.5*w.sc*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2 #bias potential
                 sum1 += Total_P[j]*math.exp(-beta*v) # v is dependent on b
             F_i = (-1/beta)*math.log(sum1)
-            new_F.append(F_i)
+            new_F[i] = F_i
         #do a sum of sq differences element by element
         ssqd = np.sum((F-new_F)**2)
         if ssqd>tol:
             is_converged = False
-        
+            F = new_F
     return Total_P
 
 if __name__ == '__main__':
