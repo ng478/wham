@@ -31,7 +31,7 @@ class window:
     def compute_histogram(self,bins): 
         self.occur, self.bin_edge = np.histogram(self.dist,bins)
         self.density = self.compute_density()
-
+        #print(self.occur,"self")
 
         #self.hist_occur, self.bin_edge = np.histogram(f,bins)
 
@@ -95,7 +95,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         tol = 0.000001
         for i,w in enumerate(windows):
             print(w.occur[i] ,"w.occur[i] ")
-            w.n = sum([w.occur[i] for i in range(len(w.occur))])
+            w.n = sum([w.occur[i] for i in range((w.occur).shape[0])])
         #For every bin compute the denominator for each bin using equation 4
         for j in range(nbins): #b is j in eqn 4
             this_denom = 0
@@ -118,12 +118,11 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         for j in range(nbins-1): #if I dont put nbins-1 here, line 116 says list index for d out of range
             P_i = 0
             for w in windows:
-                n = sum([w.occur[i] for i in range(len(w.occur))]) #make attribute earlier in hist
+                n = sum([w.occur[i] for i in range((w.occur).shape[0])]) #make attribute earlier in hist
                 #print(w.density[j], "w.density[j]")
                 #print(type(w.density[0]), "type(w.density[j])")
                 #print("range",range(nbins))
                 d = w.density[j]
-
                 summand = n*d/denom[j]
                 #print(denom[j], "denom[j]")
                 #print(d, "d")
@@ -143,20 +142,20 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         #do a sum of sq differences element by element
         ssqd = np.sum((F-new_F)**2)
         #print(ssqd, "ssqd")
-        print(F, "F_before")
+        #print(F, "F_before")
         
         if ssqd>tol:
             F = np.copy(new_F)  # overwrite old F with new_F
-            print(F, "F_after")
+            #print(F, "F_after")
             is_converged = False
             
     return Total_P
 
 if __name__ == '__main__':
 
-    global_min = -10.0  #?
-    global_max = 10.0  # ?
-    global_nb = 100
+    global_min = -7.9  #?
+    global_max = 8.0  # ?
+    global_nb = 20
     
     ''' expects *traj files in directory are complete set '''
     filenames=glob.glob('*.traj') #instead of glob loop over k in traj name
