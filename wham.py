@@ -92,12 +92,14 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         n = 0
         N = 0
         sum1 = 0
-        tol = 0.000001
+        tol = 0.4
         for i,w in enumerate(windows):
-            print(w.occur[i] ,"w.occur[i] ")
+            #print(i ,w)
+            #print(w.occur[i] ,"w.occur[i] ")
             w.n = sum([w.occur[i] for i in range((w.occur).shape[0])])
         #For every bin compute the denominator for each bin using equation 4
         for j in range(nbins): #b is j in eqn 4
+
             this_denom = 0
             #coord = W[0].bin_edge[j]-W[0].bin_edge[j-1]
             for i,w in enumerate(windows):
@@ -118,6 +120,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         for j in range(nbins-1): #if I dont put nbins-1 here, line 116 says list index for d out of range
             P_i = 0
             for w in windows:
+                
                 n = sum([w.occur[i] for i in range((w.occur).shape[0])]) #make attribute earlier in hist
                 #print(w.density[j], "w.density[j]")
                 #print(type(w.density[0]), "type(w.density[j])")
@@ -131,16 +134,31 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 P_i += summand
                 #print(P_i, "P_i")
             Total_P[j] = P_i #eqn 4
+
    #eqn 5 below 
-           
+        outF = open("wham.dat", "w")
+        outF.write('#Coor		Free')
+        outF.write("\n")          
         for i,w in enumerate(windows):
             for j in range(nbins):
                 v=0.5*w.sc*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2 #bias potential
                 sum1 += Total_P[j]*math.exp(-beta*v) # v is dependent on b
-            F_i = (-1/beta)*math.log(sum1)
-            new_F[i] = F_i
+                print(w.bin_edge[j], "j")
+                #print(sum1, "sum1")
+                if sum1 == 0:
+                    sum1 = 2
+                else:
+                    sum1 = sum1
+                F_i = (-1/beta)*math.log(sum1)
+                new_F[i] = F_i
+                g = str(w.bin_edge[j])
+                h = str(F[i])
+                outF.write(g+'	'+h)
+                outF.write("\n") 
+                print(F[i], "F_i")
+
         #do a sum of sq differences element by element
-        ssqd = np.sum((F-new_F)**2)
+                ssqd = np.sum((F-new_F)**2)
         #print(ssqd, "ssqd")
         #print(F, "F_before")
         
@@ -148,14 +166,14 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
             F = np.copy(new_F)  # overwrite old F with new_F
             #print(F, "F_after")
             is_converged = False
-            
+    outF.close()           
     return Total_P
 
 if __name__ == '__main__':
 
     global_min = -7.9  #?
     global_max = 8.0  # ?
-    global_nb = 20
+    global_nb = 32 #number of bins is important.  Too large, and you will not get enough differentiation. Too small, and the data cannot be grouped. Use the squareroot of number of datapoints for one file.
     
     ''' expects *traj files in directory are complete set '''
     filenames=glob.glob('*.traj') #instead of glob loop over k in traj name
