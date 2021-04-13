@@ -75,7 +75,7 @@ def get_bin_midpt(global_min,bin_width,bin_index):
 
 def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham method and W is the list of windows
 
-    F = np.zeros(len(W)) #initialize F to 0
+    F = np.ones(len(W)) #initialize F to 0
     
     
     nbins = global_nb
@@ -94,6 +94,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         sum1 = 0
         tol = 0.000001
         for i,w in enumerate(windows):
+            print(w.occur[i] ,"w.occur[i] ")
             w.n = sum([w.occur[i] for i in range(len(w.occur))])
         #For every bin compute the denominator for each bin using equation 4
         for j in range(nbins): #b is j in eqn 4
@@ -109,6 +110,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                     exp1 = 1
                 #print(beta,"beta")
                 #print(exp1,"exp1")
+                #print(w.n,"w.n")
                 this_denom += w.n*exp1
                 #print(this_denom,"this_denom")
             denom.append(this_denom)
@@ -124,6 +126,8 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
 
                 summand = n*d/denom[j]
                 #print(denom[j], "denom[j]")
+                #print(d, "d")
+                #print(n, "n")
                 #print(summand, "summand")
                 P_i += summand
                 #print(P_i, "P_i")
@@ -139,11 +143,11 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         #do a sum of sq differences element by element
         ssqd = np.sum((F-new_F)**2)
         #print(ssqd, "ssqd")
-        #print(F, "F_before")
+        print(F, "F_before")
         
         if ssqd>tol:
             F = np.copy(new_F)  # overwrite old F with new_F
-            #print(F, "F_after")
+            print(F, "F_after")
             is_converged = False
             
     return Total_P
