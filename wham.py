@@ -154,8 +154,8 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
 
 if __name__ == '__main__':
 
-    global_min = 40.0  #?
-    global_max = 60.0  # ?
+    global_min = -10.0  #?
+    global_max = 10.0  # ?
     global_nb = 100
     
     ''' expects *traj files in directory are complete set '''
