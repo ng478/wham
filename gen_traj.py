@@ -6,7 +6,7 @@ y1 = np.random.normal(-2, 2, 1000)
 y2 = np.random.normal(2, 2, 1000)
 colors = ['b','g']
 
-outF = open("frm0_10-run.traj", "w")
+outF = open("frm1_10-run.traj", "w")
 outF.write('# step         dist                ')
 outF.write("\n")
 counter = 0
@@ -19,7 +19,13 @@ for d in y1:
     counter += 1
 outF.close()
 
-outF = open("frm1_10-run.traj", "w")
+outF = open("frm1_10.cv", "w")
+outF.write("\n")
+outF.write('centers 5')
+outF.write("\n")
+outF.close()
+
+outF = open("frm2_10-run.traj", "w")
 outF.write('# step         dist                ')
 outF.write("\n")
 counter = 0
@@ -30,6 +36,12 @@ for d in y2:
     outF.write(c+'    '+e)
     outF.write("\n")
     counter += 1
+outF.close()
+
+outF = open("frm2_10.cv", "w")
+outF.write("\n")
+outF.write('centers 10')
+outF.write("\n")
 outF.close()
 #plots the histogram
 fig, ax1 = plt.subplots()
