@@ -98,7 +98,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
             #print(w.occur[i] ,"w.occur[i] ")
             w.n = sum([w.occur[i] for i in range((w.occur).shape[0])])
         #For every bin compute the denominator for each bin using equation 4
-        for j in range(nbins): #b is j in eqn 4
+        for j in range(nbins): #j in eqn 4
 
             this_denom = 0
             #coord = W[0].bin_edge[j]-W[0].bin_edge[j-1]
@@ -135,30 +135,34 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 #print(P_i, "P_i")
             Total_P[j] = P_i #eqn 4
 
-   #eqn 5 below 
-        outF = open("wham.dat", "w")
-        outF.write('#Coor		Free')
-        outF.write("\n")          
+   #eqn 5 below        
         for i,w in enumerate(windows):
             for j in range(nbins):
                 v=0.5*w.sc*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2 #bias potential
                 sum1 += Total_P[j]*math.exp(-beta*v) # v is dependent on b
-                print(w.bin_edge[j], "j")
+                #print(w.bin_edge[j], "j")
+                #g = str(w.bin_edge[j])
+                #print(g, "g")
                 #print(sum1, "sum1")
                 if sum1 == 0:
                     sum1 = 2
                 else:
                     sum1 = sum1
-                F_i = (-1/beta)*math.log(sum1)
-                new_F[i] = F_i
-                g = str(w.bin_edge[j])
-                h = str(F[i])
-                outF.write(g+'	'+h)
-                outF.write("\n") 
-                print(F[i], "F_i")
+            F_i = (-1/beta)*math.log(sum1)
+            #print(F_i, "F_i")   
+            new_F[i] = F_i
+        #print(F[i], "F[i]")
+            #print(F[i], "F[i]")
+                
+        #h = str(F_i)
+        #print(h, "h")
+                #outF.write(g)
+                #outF.write('	')
+                #outF.write(h)
+                #outF.write("\n") 
 
         #do a sum of sq differences element by element
-                ssqd = np.sum((F-new_F)**2)
+        ssqd = np.sum((F-new_F)**2)
         #print(ssqd, "ssqd")
         #print(F, "F_before")
         
@@ -166,9 +170,58 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
             F = np.copy(new_F)  # overwrite old F with new_F
             #print(F, "F_after")
             is_converged = False
-    outF.close()           
-    return Total_P
 
+            #print(w.bin_edge[j], "j")
+            
+      
+    #print(Total_P)    #Total_P is 32 length list - this is the probability density per bin    
+    return Total_P, F
+def write_dat(W,global_max,global_min,global_nb):
+    outF = open("wham.dat", "w")
+    outF.write('#Coor		Free')
+    outF.write("\n")
+    PMF = []
+    for j in range(global_nb):
+        sum1 = 0
+        kt=-0.6
+        denom = []
+        beta = 1/kt
+        bin_width = (global_max-global_min)/global_nb
+        Total_P, F = do_Wham(W,global_max,global_min,global_nb)
+        this_denom = 0
+        PMF_j = 0
+        #print(Total_P[j], "jth_val")
+        #print(j,"j")
+        if Total_P[j] <= 0:
+            PMF_j = 0
+            #print("its counting 0")
+            #print(PMF_j)
+            PMF.append(PMF_j)
+        elif Total_P[j] > 1000:
+            PMF_j = 'NA'
+            #print("its too big")
+            PMF.append(PMF_j)
+        else:
+            PMF_j = kt*math.log(Total_P[j])
+            PMF.append(PMF_j)
+        #print(PMF, "PMF")
+        a = str(w.bin_edge[j])
+        outF.write(a)
+        outF.write('		')
+        b = str(PMF[j])
+        outF.write(b)
+        outF.write("\n")
+        #print(denom[j], "denom[j]")
+        #print(range(len(denom)), "denom")
+        #print(range(global_nb-1), "denom")
+        #v=0.5*w.sc*(get_bin_midpt(global_min,bin_width,j)-w.center_pos)**2 #bias potential
+        #sum1 += Total_P[j]*math.exp(-beta*v) # v is dependent on b
+    #print(len(w.bin_edge), "bin_edge")
+    #print(w.bin_edge, "length of bin_edge")
+    #print(len(PMF), "length PMF")
+    #print(PMF, "PMF")
+    outF.close() 
+        #print(j,"j")
 if __name__ == '__main__':
 
     global_min = -7.9  #?
@@ -189,6 +242,7 @@ if __name__ == '__main__':
         w.compute_histogram(bins)
         w.save_histogram()
     do_Wham(windows,global_max,global_min,global_nb)
+    write_dat(windows,global_max,global_min,global_nb)
     
   #  P_unbiased = do_Wham(windows)
 
