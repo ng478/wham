@@ -108,7 +108,12 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 exp1 = math.exp(-beta*(v-F[i]))
                 #print(v,"v")
                 #print(F[i],"F[i]")
+<<<<<<< HEAD
+                #print(exp1,"exp1")
+                if exp1 < 0.01: #bc initial array sets this to 0 and then gives us an error for summand (dividing by 0)
+=======
                 if exp1 == 0: #bc initial array sets this to 0 and then gives us an error for summand (dividing by 0)
+>>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
                     exp1 = 1
                 #print(beta,"beta")
                 #print(exp1,"exp1")
@@ -197,14 +202,22 @@ def write_dat(W,global_max,global_min,global_nb):
             #print("its counting 0")
             #print(PMF_j)
             PMF.append(PMF_j)
+<<<<<<< HEAD
+        elif Total_P[j] > 1000000:
+=======
         elif Total_P[j] > 1000:
+>>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
             PMF_j = 'NA'
             #print("its too big")
             PMF.append(PMF_j)
         else:
             PMF_j = kt*math.log(Total_P[j])
             PMF.append(PMF_j)
+<<<<<<< HEAD
+        print(PMF, "PMF")
+=======
         #print(PMF, "PMF")
+>>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
         a = str(w.bin_edge[j])
         outF.write(a)
         outF.write('		')
@@ -224,9 +237,15 @@ def write_dat(W,global_max,global_min,global_nb):
         #print(j,"j")
 if __name__ == '__main__':
 
+<<<<<<< HEAD
+    global_min = 2.7  #?
+    global_max = 4.2  # ?
+    global_nb = 200 #number of bins is important.  Too large, and you will not get enough differentiation. Too small, and the data cannot be grouped. Use the squareroot of number of datapoints for one file.
+=======
     global_min = -7.9  #?
     global_max = 8.0  # ?
     global_nb = 32 #number of bins is important.  Too large, and you will not get enough differentiation. Too small, and the data cannot be grouped. Use the squareroot of number of datapoints for one file.
+>>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
     
     ''' expects *traj files in directory are complete set '''
     filenames=glob.glob('*.traj') #instead of glob loop over k in traj name
