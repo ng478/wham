@@ -125,7 +125,7 @@ def graph_histogram(W,global_max,global_min,global_nb,global_tol):
     for xc,c in zip(B,clr):
         plt.axvline(x=xc, c=c)
     plt.legend()
-    plt.savefig('myhist.png',bbox_inches='tight')
+    plt.savefig('myhist_tol{}.png'.format(global_tol),bbox_inches='tight')
 def get_bin_midpt(global_min,bin_width,bin_index):
     return global_min+(bin_index+0.5)*bin_width
 
@@ -288,7 +288,7 @@ def write_dat(W,global_max,global_min,global_nb,global_tol):
     #print(PMF, "PMF")
     outF.close() 
         #print(j,"j")
-def graph_pmf():
+def graph_pmf(global_tol):
     plt.ylabel('Free Energy (kcal/mol)')
     plt.xlabel('Distance (Å)')
     f = open("wham.dat")
@@ -308,13 +308,13 @@ def graph_pmf():
     y=[float(i) for i in y]
     fig1 = plt.figure()
     plt.plot(x,y)
-    fig1.savefig('pmf.png',bbox_inches='tight')
+    fig1.savefig('pmf_tol{}.png'.format(global_tol),bbox_inches='tight')
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("min", help="global min of your data set", type=float)
-    parser.add_argument("max", help="global max of your data set", type=float)
-    parser.add_argument("bins", help="bins for your data set", type=int)
-    parser.add_argument("tol", help="tolerance for convergence", type=float)
+    parser.add_argument("min", help="global min of your data set", type=float, default = 20)
+    parser.add_argument("max", help="global max of your data set", type=float, default = 60)
+    parser.add_argument("bins", help="bins for your data set", type=int, default = 200)
+    parser.add_argument("tol", help="tolerance for convergence", type=float, default = 0.000001)
     args = parser.parse_args()
 
     global_min = args.min  #2.7
@@ -338,6 +338,6 @@ if __name__ == '__main__':
     do_Wham(windows,global_max,global_min,global_nb,global_tol)
     write_dat(windows,global_max,global_min,global_nb,global_tol)
     graph_histogram(windows,global_max,global_min,global_nb,global_tol)
-    graph_pmf()
+    graph_pmf(global_tol)
   #  P_unbiased = do_Wham(windows)
 
