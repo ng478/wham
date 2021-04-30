@@ -1,7 +1,12 @@
+#run as python wham.py min max bins tol
 import numpy as np
 import glob
+import matplotlib.pyplot as plt
 import csv
 import math
+import argparse
+import matplotlib.pylab as pl
+import pandas as pd
 
 class window:
     def __init__(self,f):
@@ -34,7 +39,8 @@ class window:
         #print(self.occur,"self")
 
         #self.hist_occur, self.bin_edge = np.histogram(f,bins)
-
+        #graph histograms below
+       
 
 
         ''' check for existence of histogram data file '''
@@ -42,13 +48,19 @@ class window:
         read it in and recompute hist, else just read in the hist '''
 
         ''' self.hist = np.hist(...) '''
-    def save_histogram(self):
-        file = open("histogram_{}.txt".format(self.framenum), "w")
+    def save_histogram(self,global_min,global_max,global_nb,global_tol):
+        file = open("histogram_fn{}_cp{}_sc{}_min{}_max{}_bins{}_tol{}.txt".format(self.framenum,self.center_pos,self.sc,global_min,global_max,global_nb,global_tol), "w")
         writer = csv.writer(file)
         
         for w in range(len(self.occur)):
             writer.writerow([self.occur[w], self.bin_edge[w]])
         file.close()
+
+        #n = len(self.bin_edge)
+        #clr = pl.cm.jet(np.linspace(0,1,n))
+        #plt.hist(self.dist, bins=global_nb, range=[global_min, global_max], histtype='step',edgecolor='r',linewidth=3)
+
+
 #create file names to save to and save 
         pass
 
@@ -69,11 +81,55 @@ class window:
   #      
    #         p_b[d]= math.exp(-beta*v[d]) #p_i_b[d]
 #        self.P=
-
+def graph_histogram(W,global_max,global_min,global_nb,global_tol):
+    histfiles=glob.glob('histogram_fn[0-9]*.txt')
+    K = []#list of framenumbers
+    B = []#list of center positions
+    FC = []
+    for f in histfiles:
+        fn=f.split('fn')[1].split('_cp')[0]  #framenumber
+        cp=f.split('cp')[1].split('_sc')[0] #centerposition
+        sc=f.split('sc')[1].split('_min')[0] #spring constant
+        K.append(fn)
+        K= [ int(x) for x in K ]
+        B.append(cp)
+        B= [ float(x) for x in B ]
+        FC.append(sc)
+        FC= [ float(x) for x in FC ]
+    df = pd. DataFrame([histfiles,K,B,FC])
+    df = df.T
+    df.columns = ["H", "K", "B", "FC"]
+    n = len(B)
+    clr = pl.cm.jet(np.linspace(0,1,n))
+    df = df.sort_values('B')
+    H = df['H'].to_list()
+    K = df['K'].to_list()
+    B = df['B'].to_list()
+    FC = df['FC'].to_list()
+    n = len(B)
+    clr = pl.cm.jet(np.linspace(0,1,n))
+    fig, ax = plt.subplots(figsize=(15,12))
+    #ax.spines['right'].set_visible(False)
+    #ax.spines['top'].set_visible(False)
+    plt.ylabel('Density (1/Å)')
+    plt.xlabel('Distance (Å)')
+    #ymax=2.6
+    #plt.ylim([0,ymax])
+    plt.xlim([2,5])
+    for i,f in enumerate(H):
+        df = pd.read_csv(f,header=None)
+        df.columns = ['frequency', 'bin']
+        bins = df['bin'].to_list()
+        freq = df['frequency'].to_list()
+        plt.bar(bins,freq,color=clr[i],alpha=0.7,label=B[i])
+    for xc,c in zip(B,clr):
+        plt.axvline(x=xc, c=c)
+    plt.legend()
+    plt.savefig('myhist.png',bbox_inches='tight')
 def get_bin_midpt(global_min,bin_width,bin_index):
     return global_min+(bin_index+0.5)*bin_width
 
-def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham method and W is the list of windows
+def do_Wham(W,global_max,global_min,global_nb,global_tol): #this function will do the wham method and W is the list of windows
 
     F = np.ones(len(W)) #initialize F to 0
     
@@ -92,7 +148,7 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
         n = 0
         N = 0
         sum1 = 0
-        tol = 0.4
+        tol = global_tol
         for i,w in enumerate(windows):
             #print(i ,w)
             #print(w.occur[i] ,"w.occur[i] ")
@@ -108,12 +164,9 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
                 exp1 = math.exp(-beta*(v-F[i]))
                 #print(v,"v")
                 #print(F[i],"F[i]")
-<<<<<<< HEAD
                 #print(exp1,"exp1")
                 if exp1 < 0.01: #bc initial array sets this to 0 and then gives us an error for summand (dividing by 0)
-=======
-                if exp1 == 0: #bc initial array sets this to 0 and then gives us an error for summand (dividing by 0)
->>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
+
                     exp1 = 1
                 #print(beta,"beta")
                 #print(exp1,"exp1")
@@ -175,14 +228,18 @@ def do_Wham(W,global_max,global_min,global_nb): #this function will do the wham 
             F = np.copy(new_F)  # overwrite old F with new_F
             #print(F, "F_after")
             is_converged = False
-
+            #print(ssqd, "ssqd")
             #print(w.bin_edge[j], "j")
             
       
     #print(Total_P)    #Total_P is 32 length list - this is the probability density per bin    
     return Total_P, F
-def write_dat(W,global_max,global_min,global_nb):
-    outF = open("wham.dat", "w")
+def write_dat(W,global_max,global_min,global_nb,global_tol):
+    a = str(global_min)
+    b = str(global_max)
+    c = str(global_nb)
+    d = str(global_tol)
+    outF = open("wham"+"_min"+a+"_max"+b+"_bins"+c+"_tol"+d+".dat", "w")
     outF.write('#Coor		Free')
     outF.write("\n")
     PMF = []
@@ -192,7 +249,7 @@ def write_dat(W,global_max,global_min,global_nb):
         denom = []
         beta = 1/kt
         bin_width = (global_max-global_min)/global_nb
-        Total_P, F = do_Wham(W,global_max,global_min,global_nb)
+        Total_P, F = do_Wham(W,global_max,global_min,global_nb,global_tol)
         this_denom = 0
         PMF_j = 0
         #print(Total_P[j], "jth_val")
@@ -202,22 +259,18 @@ def write_dat(W,global_max,global_min,global_nb):
             #print("its counting 0")
             #print(PMF_j)
             PMF.append(PMF_j)
-<<<<<<< HEAD
+
         elif Total_P[j] > 1000000:
-=======
-        elif Total_P[j] > 1000:
->>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
+
             PMF_j = 'NA'
             #print("its too big")
             PMF.append(PMF_j)
         else:
             PMF_j = kt*math.log(Total_P[j])
             PMF.append(PMF_j)
-<<<<<<< HEAD
-        print(PMF, "PMF")
-=======
+
         #print(PMF, "PMF")
->>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
+
         a = str(w.bin_edge[j])
         outF.write(a)
         outF.write('		')
@@ -235,17 +288,39 @@ def write_dat(W,global_max,global_min,global_nb):
     #print(PMF, "PMF")
     outF.close() 
         #print(j,"j")
+def graph_pmf():
+    plt.ylabel('Free Energy (kcal/mol)')
+    plt.xlabel('Distance (Å)')
+    f = open("wham.dat")
+    lines = f.readlines()
+    x, y = zip(*(line.split() for line in lines))
+    f.close()
+    #print(x)
+    x = list(x)
+    y = list(y)
+    y.pop(0)
+    y.pop(0)
+    y.pop(-1)
+    x.pop(0)
+    x.pop(0)
+    x.pop(-1)
+    x=[float(i) for i in x]
+    y=[float(i) for i in y]
+    fig1 = plt.figure()
+    plt.plot(x,y)
+    fig1.savefig('pmf.png',bbox_inches='tight')
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("min", help="global min of your data set", type=float)
+    parser.add_argument("max", help="global max of your data set", type=float)
+    parser.add_argument("bins", help="bins for your data set", type=int)
+    parser.add_argument("tol", help="tolerance for convergence", type=float)
+    args = parser.parse_args()
 
-<<<<<<< HEAD
-    global_min = 2.7  #?
-    global_max = 4.2  # ?
-    global_nb = 200 #number of bins is important.  Too large, and you will not get enough differentiation. Too small, and the data cannot be grouped. Use the squareroot of number of datapoints for one file.
-=======
-    global_min = -7.9  #?
-    global_max = 8.0  # ?
-    global_nb = 32 #number of bins is important.  Too large, and you will not get enough differentiation. Too small, and the data cannot be grouped. Use the squareroot of number of datapoints for one file.
->>>>>>> f8fcfd2a0200b0782527f915aed9cd85d5a30ac6
+    global_min = args.min  #2.7
+    global_max = args.max  #4.2  
+    global_nb = args.bins #number of bins is important.  Too large, and you will not get enough differentiation. Too small, and the data cannot be grouped. Use the squareroot of number of datapoints for one file.
+    global_tol = args.tol #tolerance
     
     ''' expects *traj files in directory are complete set '''
     filenames=glob.glob('*.traj') #instead of glob loop over k in traj name
@@ -259,9 +334,10 @@ if __name__ == '__main__':
     bins = np.linspace(global_min, global_max, global_nb)
     for w in windows:
         w.compute_histogram(bins)
-        w.save_histogram()
-    do_Wham(windows,global_max,global_min,global_nb)
-    write_dat(windows,global_max,global_min,global_nb)
-    
+        w.save_histogram(global_min,global_max,global_nb,global_tol)
+    do_Wham(windows,global_max,global_min,global_nb,global_tol)
+    write_dat(windows,global_max,global_min,global_nb,global_tol)
+    graph_histogram(windows,global_max,global_min,global_nb,global_tol)
+    graph_pmf()
   #  P_unbiased = do_Wham(windows)
 
